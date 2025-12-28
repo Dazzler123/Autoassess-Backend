@@ -81,7 +81,7 @@ def predict():
     # remove uploaded file
     os.remove(image_path)
 
-    return jsonify({
+    return jsonify({'/Users/dazzler/Downloads/test-images/images.jpeg'
         "detections": detections,
         "count": len(detections)
     })
