@@ -68,9 +68,18 @@ def predict():
             cls_id = int(box.cls[0])
             confidence = float(box.conf[0])
 
+            # get the bounding box coordinates (xyxy)
+            x1, y1, x2, y2 = box.xyxy[0].tolist()
+
             detections.append({
                 "part": CLASS_NAMES.get(cls_id, "unknown"),
-                "confidence": round(confidence, 3)
+                "confidence": round(confidence, 3),
+                "bounding_box": {
+                    "x1": int(x1),
+                    "y1": int(y1),
+                    "x2": int(x2),
+                    "y2": int(y2)
+                }
             })
 
     # remove uploaded file
