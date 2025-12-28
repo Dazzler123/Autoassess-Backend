@@ -23,3 +23,31 @@ classes:
   7: mirror
   8: windscreen
   
+# cost estimations in Srilanka, collected by automotive maintenance workshops
+cost_estimation:
+  labour_costs:
+    door: 6000
+    bumper: 8000
+    headlight: 4000
+    taillight: 3500
+    fender: 6000
+    hood: 9000
+    trunk: 8000
+    mirror: 3000
+    windscreen: 12000
+
+  part_costs:
+    door: 45000
+    bumper: 35000
+    headlight: 25000
+    taillight: 18000
+    fender: 30000
+    hood: 55000
+    trunk: 50000
+    mirror: 12000
+    windscreen: 85000
+
+  severity_multipliers:
+    low: 0.5
+    medium: 1.0
+    high: 1.5
