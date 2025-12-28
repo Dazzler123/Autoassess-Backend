@@ -1,32 +1,26 @@
 from flask import Flask, jsonify, request
 from ultralytics import YOLO
-from PIL import Image
-import os
-import uuid
+import os, uuid
+from app.config import CONFIG
 
 app = Flask(__name__)
 
+# load config values
+APP_CONFIG = CONFIG["app"]
+PATHS = CONFIG["paths"]
+INFERENCE = CONFIG["inference"]
+CLASS_NAMES = CONFIG["classes"]
+
 # paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "..", "uploads")
-MODEL_PATH = os.path.join(BASE_DIR, "..", "models", "autoassess_yolov8_final.pt")
+
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "..", PATHS["upload_folder"])
+MODEL_PATH = os.path.join(BASE_DIR, "..", PATHS["model_path"])
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 model = YOLO(MODEL_PATH)
 
-# class mapping 
-CLASS_NAMES = {
-    0: "door",
-    1: "bumper",
-    2: "headlight",
-    3: "taillight",
-    4: "fender",
-    5: "hood",
-    6: "trunk",
-    7: "mirror",
-    8: "windscreen"
-}
 
 ###
 ## This method is used to check whether the backend runs healthy.
@@ -34,8 +28,9 @@ CLASS_NAMES = {
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({
+        "service": APP_CONFIG["name"],
+        "version": APP_CONFIG["version"],
         "status": "OK",
-        "service": "AutoAssess Backend",
         "model_loaded": True
     })
 
@@ -61,9 +56,9 @@ def predict():
     # run detection
     results = model(
         image_path,
-        conf=0.25,
-        iou=0.6,
-        imgsz=640
+        conf=INFERENCE["confidence_threshold"],
+        iou=INFERENCE["iou_threshold"],
+        imgsz=INFERENCE["image_size"]
     )
 
     detections = []
@@ -88,4 +83,4 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=APP_CONFIG["debug"])
