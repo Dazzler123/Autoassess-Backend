@@ -1,0 +1,25 @@
+app:
+  name: AutoAssess Backend
+  version: 1.0
+  debug: true
+
+paths:
+  model_path: models/autoassess_yolov8_final.pt
+  upload_folder: uploads
+
+inference:
+  image_size: 640
+  confidence_threshold: 0.25
+  iou_threshold: 0.6
+
+classes:
+  0: door
+  1: bumper
+  2: headlight
+  3: taillight
+  4: fender
+  5: hood
+  6: trunk
+  7: mirror
+  8: windscreen
+  
