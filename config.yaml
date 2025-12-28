@@ -23,8 +23,8 @@ classes:
   7: mirror
   8: windscreen
   
-  # cost estimations in Srilanka, collected by automotive maintenance workshops
-  cost_estimation:
+# cost estimations in Srilanka, collected by automotive maintenance workshops
+cost_estimation:
   labour_costs:
     door: 6000
     bumper: 8000

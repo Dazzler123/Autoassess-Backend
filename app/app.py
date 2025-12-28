@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, request
 from ultralytics import YOLO
 import os, uuid
+
 from app.config import CONFIG
+from app.cost_estimator import estimate_cost
 
 app = Flask(__name__)
 
@@ -67,13 +69,23 @@ def predict():
         for box in r.boxes:
             cls_id = int(box.cls[0])
             confidence = float(box.conf[0])
+            part = CLASS_NAMES.get(cls_id, "unknown")
 
             # get the bounding box coordinates (xyxy)
             x1, y1, x2, y2 = box.xyxy[0].tolist()
 
+            # estimate the repair cost
+            cost_info = estimate_cost(part, confidence)
+
             detections.append({
-                "part": CLASS_NAMES.get(cls_id, "unknown"),
+                "part": part,
                 "confidence": round(confidence, 3),
+                "severity": cost_info["severity"],
+                "cost_estimation": {
+                    "labour_cost": cost_info["labour_cost"],
+                    "part_cost": cost_info["part_cost"],
+                    "total_cost": cost_info["total_cost"]
+                },
                 "bounding_box": {
                     "x1": int(x1),
                     "y1": int(y1),
