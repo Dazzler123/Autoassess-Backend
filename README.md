@@ -5,7 +5,7 @@ AI-powered vehicle damage detection using a YOLOv8 model.
 
 ## Features
 - Health check API
-- Image-based damage detection (in progress)
+- Image-based damage detection
 - Designed for mobile and web integration
 
 ## Tech Stack
