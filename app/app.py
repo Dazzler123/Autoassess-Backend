@@ -15,13 +15,11 @@ CLASS_NAMES = CONFIG["classes"]
 
 # paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "..", PATHS["upload_folder"])
 MODEL_PATH = os.path.join(BASE_DIR, "..", PATHS["damage_detection_model_path"])
-
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# load the model
+# load the damage detection model
 model = YOLO(MODEL_PATH)
 
 
@@ -43,12 +41,13 @@ def health():
 ###
 @app.route("/predict", methods=["POST"])
 def predict():
+
     make = request.form.get("make")
     model_name = request.form.get("model")
 
     if not make or not model_name:
         return jsonify({"error": "Vehicle make and model are required"}), 400
-    
+
     if "image" not in request.files:
         return jsonify({"error": "No image file provided"}), 400
 
@@ -57,12 +56,9 @@ def predict():
     if file.filename == "":
         return jsonify({"error": "Empty filename"}), 400
 
-    # save the image temporarily
-    filename = f"{uuid.uuid4()}.jpg"
-    image_path = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(image_path)
+    # save the uploaded image temporarily
+    image_path = save_uploaded_image(file)
 
-    # run detection
     results = model(
         image_path,
         conf=INFERENCE["confidence_threshold"],
@@ -70,29 +66,54 @@ def predict():
         imgsz=INFERENCE["image_size"]
     )
 
+    detections = process_detections(results, make, model_name)
+
+    grand_total = sum(
+        d["cost_estimation"]["total_cost"] for d in detections
+    )
+
+    os.remove(image_path)
+
+    return jsonify({
+        "vehicle": {
+            "make": make,
+            "model": model_name
+        },
+        "detections": detections,
+        "count": len(detections),
+        "grand_total_estimated_cost": grand_total
+    })
+
+
+###
+## This method is used to read damages in the image and process the total repair cost.
+###
+def process_detections(results, make, model_name):
     detections = []
 
     for r in results:
+        image_height, image_width = r.orig_shape
+
         for box in r.boxes:
             cls_id = int(box.cls[0])
             confidence = float(box.conf[0])
             part = CLASS_NAMES.get(cls_id, "unknown")
 
-            # get the bounding box coordinates (xyxy)
             x1, y1, x2, y2 = box.xyxy[0].tolist()
 
-            # estimate the repair cost
-            cost_info = estimate_cost(part, confidence, make, model_name)
+            severity, damage_ratio = calculate_severity(
+                x1, y1, x2, y2, image_width, image_height
+            )
+
+            # predict and estimate the total repair cost
+            cost_info = estimate_cost(part, severity, make, model_name)
 
             detections.append({
                 "part": part,
                 "confidence": round(confidence, 3),
-                "severity": cost_info["severity"],
-                "cost_estimation": {
-                    "labour_cost": cost_info["labour_cost"],
-                    "part_cost": cost_info["part_cost"],
-                    "total_cost": cost_info["total_cost"]
-                },
+                "severity": severity,
+                "damage_ratio": round(damage_ratio, 4),
+                "cost_estimation": cost_info,
                 "bounding_box": {
                     "x1": int(x1),
                     "y1": int(y1),
@@ -101,24 +122,36 @@ def predict():
                 }
             })
 
+    return detections
 
-    grand_total = sum(
-        d["cost_estimation"]["total_cost"] for d in detections
-    )
 
-    # remove uploaded file
-    os.remove(image_path)
+###
+## This method is used to save an image in the temp folder.
+###
+def save_uploaded_image(file):
+    filename = f"{uuid.uuid4()}.jpg"
+    image_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(image_path)
+    return image_path
 
-    return jsonify({
-        "vehicle": {
-            "make": make,
-            "model": model_name
-        },
 
-        "detections": detections,
-        "count": len(detections),
-        "grand_total_estimated_cost": grand_total
-    })
+###
+## This method is used to calculate the damage level.
+###
+def calculate_severity(x1, y1, x2, y2, image_width, image_height):
+    box_area = (x2 - x1) * (y2 - y1)
+    image_area = image_width * image_height
+    damage_ratio = box_area / image_area
+
+    if damage_ratio < 0.05:
+        severity = "low"
+    elif damage_ratio < 0.15:
+        severity = "medium"
+    else:
+        severity = "high"
+
+    return severity, damage_ratio
+
 
 
 if __name__ == "__main__":
