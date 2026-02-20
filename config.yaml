@@ -4,7 +4,8 @@ app:
   debug: true
 
 paths:
-  model_path: models/autoassess_yolov8_final.pt
+  damage_detection_model_path: models/autoassess_yolov8_final.pt
+  price_prediction_model_path: models/autoassess_price_model.pkl
   upload_folder: uploads
 
 inference:
@@ -35,17 +36,6 @@ cost_estimation:
     trunk: 8000
     mirror: 3000
     windscreen: 12000
-
-  part_costs:
-    door: 45000
-    bumper: 35000
-    headlight: 25000
-    taillight: 18000
-    fender: 30000
-    hood: 55000
-    trunk: 50000
-    mirror: 12000
-    windscreen: 85000
 
   severity_multipliers:
     low: 0.5

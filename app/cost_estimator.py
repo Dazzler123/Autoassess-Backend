@@ -1,4 +1,5 @@
 from app.config import CONFIG
+from app.price_model import predict_part_price
 
 COST_CONFIG = CONFIG["cost_estimation"]
 
@@ -6,8 +7,9 @@ COST_CONFIG = CONFIG["cost_estimation"]
 ##  This method can be used to estimate repair cost based on detected part and confidence score.
 ##  Confidence is used as a proxy for damage severity.
 ###
-def estimate_cost(part, confidence):
-    # determine severity from confidence
+def estimate_cost(part, confidence, make, model_name):
+
+    # severity from confidence
     if confidence < 0.35:
         severity = "low"
     elif confidence < 0.6:
@@ -15,12 +17,18 @@ def estimate_cost(part, confidence):
     else:
         severity = "high"
 
+    predicted_part_price = predict_part_price(part, make, model_name)
+
     labour_cost = COST_CONFIG["labour_costs"].get(part, 0)
-    part_cost = COST_CONFIG["part_costs"].get(part, 0)
     multiplier = COST_CONFIG["severity_multipliers"][severity]
 
-    estimated_labour = int(labour_cost * multiplier)
-    estimated_part = int(part_cost * multiplier)
+    estimated_labour = int(labour_cost)
+
+    # part-specific override
+    if part in ["windscreen", "headlight", "taillight", "mirror"]:
+        estimated_part = int(predicted_part_price)
+    else:
+        estimated_part = int(predicted_part_price * multiplier)
 
     total_cost = estimated_labour + estimated_part
 
