@@ -4,7 +4,8 @@ app:
   debug: true
 
 paths:
-  model_path: models/autoassess_yolov8_final.pt
+  damage_detection_model_path: models/autoassess_yolov8_final.pt
+  price_prediction_model_path: models/autoassess_price_model.pkl
   upload_folder: uploads
 
 inference:

@@ -17,7 +17,8 @@ CLASS_NAMES = CONFIG["classes"]
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "..", PATHS["upload_folder"])
-MODEL_PATH = os.path.join(BASE_DIR, "..", PATHS["model_path"])
+MODEL_PATH = os.path.join(BASE_DIR, "..", PATHS["damage_detection_model_path"])
+PRICE_PREDICTION_MODEL_PATH = os.path.join(BASE_DIR, "..", PATHS["price_prediction_model_path"])
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
