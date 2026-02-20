@@ -37,17 +37,6 @@ cost_estimation:
     mirror: 3000
     windscreen: 12000
 
-  part_costs:
-    door: 45000
-    bumper: 35000
-    headlight: 25000
-    taillight: 18000
-    fender: 30000
-    hood: 55000
-    trunk: 50000
-    mirror: 12000
-    windscreen: 85000
-
   severity_multipliers:
     low: 0.5
     medium: 1.0
