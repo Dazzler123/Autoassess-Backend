@@ -21,6 +21,7 @@ MODEL_PATH = os.path.join(BASE_DIR, "..", PATHS["model_path"])
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# load the model
 model = YOLO(MODEL_PATH)
 
 
