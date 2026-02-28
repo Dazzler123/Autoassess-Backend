@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from ultralytics import YOLO
 import os, uuid
 
@@ -6,6 +7,7 @@ from app.config import CONFIG
 from app.cost_estimator import estimate_cost
 
 app = Flask(__name__)
+CORS(app)
 
 # load config values
 APP_CONFIG = CONFIG["app"]
