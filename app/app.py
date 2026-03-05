@@ -121,7 +121,9 @@ def process_detections(results, make, model_name):
                     "y1": int(y1),
                     "x2": int(x2),
                     "y2": int(y2)
-                }
+                },
+                "original_width": image_width,
+                "original_height": image_height,
             })
 
     return detections
