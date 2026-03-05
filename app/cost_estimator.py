@@ -8,7 +8,7 @@ COST_CONFIG = CONFIG["cost_estimation"]
 ##  Confidence is used as a proxy for damage severity.
 ###
 def estimate_cost(part, severity, make, model_name):
-    predicted_part_price = predict_part_price(part, make, model_name)
+    predicted_part_price = predict_part_price(part, make.lower(), model_name.lower())
 
     labour_cost = COST_CONFIG["labour_costs"].get(part, 0)
     multiplier = COST_CONFIG["severity_multipliers"][severity]
