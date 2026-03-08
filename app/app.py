@@ -53,13 +53,13 @@ def predict():
     if "image" not in request.files:
         return jsonify({"error": "No image file provided"}), 400
 
-    file = request.files["image"]
+    image = get_image_from_request()
 
-    if file.filename == "":
+    if image.filename == "":
         return jsonify({"error": "Empty filename"}), 400
 
     # save the uploaded image temporarily
-    image_path = save_uploaded_image(file)
+    image_path = save_uploaded_image(image)
 
     results = model(
         image_path,
@@ -85,6 +85,29 @@ def predict():
         "count": len(detections),
         "grand_total_estimated_cost": grand_total
     })
+
+
+###
+## This method is used decide the image format given, and read the image from the request.
+###
+def get_image_from_request():
+
+    # Case 1: Standard file upload
+    if 'image' in request.files:
+        file = request.files['image']
+        file_bytes = np.frombuffer(file.read(), np.uint8)
+        image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+        return image
+
+    # Case 2: iPhone / Safari base64 upload
+    if request.json and 'image_bytes' in request.json:
+        image_data = request.json['image_bytes']
+        decoded = base64.b64decode(image_data)
+        file_bytes = np.frombuffer(decoded, np.uint8)
+        image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+        return image
+
+    return None
 
 
 ###
